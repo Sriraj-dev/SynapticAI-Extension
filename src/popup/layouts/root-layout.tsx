@@ -47,6 +47,8 @@ export const RootLayout = () => {
     )
   }
 
+  console.log("SYNC_HOST", SYNC_HOST)
+
   return (
     <ClerkProvider
       routerPush={(to) => navigate(to)}

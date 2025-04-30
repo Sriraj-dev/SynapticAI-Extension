@@ -1,5 +1,5 @@
 import { UserButton, useUser } from "@clerk/chrome-extension"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { ChatWindow } from "../components/chat-window"
 import { ThemeProvider } from "../components/theme-provider"
@@ -16,11 +16,18 @@ export const Home = () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
     if (tab?.id) {
       chrome.tabs.sendMessage(tab.id, {
-        type: "TOGGLE_FLOATING_CHAT",
+        type: "TOGGLE_SYNAPTICAI_FLOATING_CHAT",
         enabled
       })
     }
+    chrome.storage.local.set({ "synaptic-ai-floating-chat-enabled": enabled })
   }
+
+  useEffect(() => {
+    chrome.storage.local.get("synaptic-ai-floating-chat-enabled").then((result) => {
+      setIsFloatingChatEnabled(result["synaptic-ai-floating-chat-enabled"]??false)
+    })
+  }, [])
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="synaptic-ai-theme">

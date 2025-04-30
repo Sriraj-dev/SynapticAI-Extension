@@ -16,29 +16,37 @@ const enabledRef = { current: false }
 // Default export for Plasmo
 // Just to suppress the error on chrome dev console
 // Seems like plasmo is expecting a default export for content scripts
-// export default function FloatingChat() {
+export default function FloatingChat() {
 
-//   useEffect(() => {
-//     // Listen for messages from the popup
-//     const handleMessage = (message: any) => {
-//       if (message.type === "TOGGLE_FLOATING_CHAT") {
-//         enabledRef.current = message.enabled
-//         if (!message.enabled) {
-//           hideSelectionButton()
-//           container.style.display = "none"
-//         } else {
-//           container.style.display = "block"
-//         }
-//       }
-//     }
+  useEffect(() => {
+    chrome.storage.local.get("synaptic-ai-floating-chat-enabled").then((result) => {
+      if (result["synaptic-ai-floating-chat-enabled"]) {
+        container.style.display = "block"
+      }else{
+        hideSelectionButton()
+        container.style.display = "none"
+      }
+    })
+    // Listen for messages from the popup
+    const handleMessage = (message: any) => {
+      if (message.type === "TOGGLE_SYNAPTICAI_FLOATING_CHAT") {
+        enabledRef.current = message.enabled
+        if (!message.enabled) {
+          hideSelectionButton()
+          container.style.display = "none"
+        } else {
+          container.style.display = "block"
+        }
+      }
+    }
 
-//     chrome.runtime.onMessage.addListener(handleMessage)
-//     return () => {
-//       chrome.runtime.onMessage.removeListener(handleMessage)
-//     }
-//   }, [])
-//   return null
-// }
+    chrome.runtime.onMessage.addListener(handleMessage)
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleMessage)
+    }
+  }, [])
+  return null
+}
 
 //Create a element for showing a button when user highlights text
 const selectionButton = document.createElement("div")
@@ -69,7 +77,7 @@ container.style.cssText = `
   z-index: 1000000;
   padding: 8px;
   overflow: visible;
-  display: block; //Will be triggered by enabling it from popup
+  display: none; //Will be triggered by enabling it from popup
 `
 
 // Create a shadow root

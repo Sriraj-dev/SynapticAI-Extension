@@ -16,6 +16,4 @@ log.methodFactory = function (methodName, logLevel, loggerName) {
   }
 }
 
-// log.setLevel(log.getLevel())
-
 export { log as logger }

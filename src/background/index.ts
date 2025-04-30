@@ -24,11 +24,13 @@ async function getToken() {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  getToken()
-    .then((token) => sendResponse({ token }))
-    .catch((error) => {
-      logger.warn('[Synaptic AI Background service worker] Error:', JSON.stringify(error))
-      sendResponse({ token: null })
-    })
-  return true 
+  if(request.type === "get-token"){
+    getToken()
+      .then((token) => sendResponse({ token }))
+      .catch((error) => {
+        logger.warn('[Synaptic AI Background service worker] Error:', JSON.stringify(error))
+        sendResponse({ token: null })
+      })
+    return true 
+  }
 })

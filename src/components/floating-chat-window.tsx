@@ -14,6 +14,7 @@ export const FloatingChatWindow = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [context, setContext] = useState<string | null>(null)
   const [isContextAttached, setIsContextAttached] = useState(false)
+
   const {
     messages,
     error,
@@ -23,18 +24,15 @@ export const FloatingChatWindow = () => {
     askSynapticAI,
     saveToStorage
   } = useChatSSE()
+  
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  useLayoutEffect(() => {
-    scrollToBottom()
-  },[messages])
-
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [messages,isOpen])
 
   const getToken = async () => {
     try {
@@ -118,8 +116,8 @@ export const FloatingChatWindow = () => {
 
   const handleClose = async () => {
     // Save messages to storage before closing
-    await saveToStorage()
     setIsOpen(false)
+    await saveToStorage()
   }
 
   if (isLoading) {
@@ -144,7 +142,7 @@ export const FloatingChatWindow = () => {
   }
 
   if (!authToken) {
-    logger.warn("[Synaptic AI]: No auth token found!")
+    logger.debug("[Synaptic AI]: No auth token found!")
     return null
   }
 
@@ -157,7 +155,6 @@ export const FloatingChatWindow = () => {
         <button
           onClick={() => {
             setIsOpen(true)
-            scrollToBottom()
           }}
           style={{
             width: "180px",
@@ -380,6 +377,9 @@ export const FloatingChatWindow = () => {
               fontSize: "14px",
               lineHeight: "20px"
             }}
+            onKeyDown={(e)=>e.stopPropagation()}
+            onKeyUp={(e)=>e.stopPropagation()}
+            onKeyPress={(e)=>e.stopPropagation()}
             className="flex-1 rounded-xl border border-muted-foreground bg-primary px-4 py-2.5 outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 text-primary-foreground"
             disabled={isChatLoading || !authToken}
           />
