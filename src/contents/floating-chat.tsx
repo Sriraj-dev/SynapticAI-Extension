@@ -63,7 +63,7 @@ selectionButton.style.cssText = `
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  display: none; /* Hide initially */
+  display: block; /* Hide initially */
 `
 document.body.appendChild(selectionButton)
 
@@ -158,6 +158,7 @@ selectionButton.addEventListener("click", () => {
 
 // Listen to mouseup for selection
 document.addEventListener("mouseup", (e) => {
+  if(!enabledRef.current) return;
   logger.debug("[Synaptic AI] Mouseup event detected")
   const selection = window.getSelection()?.toString()?.trim()
   if (selection) {
