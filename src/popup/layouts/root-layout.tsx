@@ -47,7 +47,7 @@ export const RootLayout = () => {
     )
   }
 
-  console.log("SYNC_HOST", SYNC_HOST)
+  logger.debug("SYNC_HOST", SYNC_HOST)
 
   return (
     <ClerkProvider

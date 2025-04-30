@@ -44,7 +44,7 @@ export function usePersistentChat() {
                 ...msg,
                 timestamp: new Date(msg.timestamp)
               }))
-              console.log("Initializing Messages")
+              logger.debug("Initializing Messages")
               setMessages(parsedMessages)
             }
           }
@@ -72,7 +72,7 @@ export function usePersistentChat() {
   // Save current messages to storage
   const saveToStorage = useCallback(async (messagesOverride?: ChatMessage[]) => {
     try {
-    console.log("Saving messages to storage")
+    logger.debug("Saving messages to storage")
     
     const targetMessages = messagesOverride || messages
       const messagesToStore: StoredMessage[] = targetMessages.map(msg => ({
