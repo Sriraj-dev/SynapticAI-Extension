@@ -38,10 +38,9 @@ export function ChatWindow() {
     // Get current tab URL using chrome.tabs API
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
     const url = tab?.url || ""
-    const context = "This is the context of the page"
 
     const authToken = await getToken()
-    await askSynapticAI(input.trim(), url, authToken, context, true)
+    await askSynapticAI(input.trim(), url, authToken, null, true)
 
   }
 
@@ -143,7 +142,7 @@ export function ChatWindow() {
             </motion.div>
           </motion.div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 
