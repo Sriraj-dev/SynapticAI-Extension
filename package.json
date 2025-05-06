@@ -1,9 +1,9 @@
 {
   "name": "synaptic-ai-extension",
   "displayName": "Synaptic AI",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Transform your thoughts into intelligence with Synaptic AI",
-  "author": "Plasmo Corp. <foss@plasmo.com>",
+  "author": "Sriraj-Dev. <Psriraj1902@gmail.com>",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",

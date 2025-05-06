@@ -1,38 +1,43 @@
-import tailwindCSS from "data-text:~styles/content_script.css"
-import type { PlasmoCSConfig } from "plasmo"
-import { useEffect, useRef, useState } from "react"
-import { createRoot } from "react-dom/client"
+import tailwindCSS from "data-text:~styles/content_script.css";
+import type { PlasmoCSConfig } from "plasmo";
+import { useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
 
-import { FloatingChatWindow } from "~components/floating-chat-window"
-import { logger } from "~utils/logger"
+
+
+import { FloatingChatWindow } from "~components/floating-chat-window";
+import { logger } from "~utils/logger";
+
+
+
+
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"]
 }
 
-// Create a ref to track enabled state globally
-const enabledRef = { current: false }
-
 // Default export for Plasmo
 // Just to suppress the error on chrome dev console
 // Seems like plasmo is expecting a default export for content scripts
 export default function FloatingChat() {
+  const enabledRef = useRef(false)
 
   useEffect(() => {
-    chrome.storage.local.get("synaptic-ai-floating-chat-enabled").then((result) => {
-      if (result["synaptic-ai-floating-chat-enabled"]) {
-        container.style.display = "block"
-      }else{
-        hideSelectionButton()
-        container.style.display = "none"
-      }
-    })
+    chrome.storage.local
+      .get("synaptic-ai-floating-chat-enabled")
+      .then((result) => {
+        if (result["synaptic-ai-floating-chat-enabled"]) {
+          container.style.display = "block"
+          enabledRef.current = true
+        } else {
+          container.style.display = "none"
+        }
+      })
     // Listen for messages from the popup
     const handleMessage = (message: any) => {
       if (message.type === "TOGGLE_SYNAPTICAI_FLOATING_CHAT") {
         enabledRef.current = message.enabled
         if (!message.enabled) {
-          hideSelectionButton()
           container.style.display = "none"
         } else {
           container.style.display = "block"
@@ -45,6 +50,27 @@ export default function FloatingChat() {
       chrome.runtime.onMessage.removeListener(handleMessage)
     }
   }, [])
+
+  useEffect(() => {
+    const handleMouseUp = (_) => {
+      if(!enabledRef.current) return 
+      logger.debug("[Synaptic AI] Mouseup event detected")
+      const selection = window.getSelection()?.toString()?.trim()
+      if (selection) {
+        selectedText = selection
+        positionSelectionButton()
+        showSelectionButton()
+      } else {
+        hideSelectionButton()
+      }
+    }
+    // Listen to mouseup for selection
+    document.addEventListener("mouseup", handleMouseUp)
+    return () => {
+      document.removeEventListener("mouseup", handleMouseUp)
+    }
+  })
+
   return null
 }
 
@@ -63,7 +89,7 @@ selectionButton.style.cssText = `
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  display: block; /* Hide initially */
+  display: none; /* Hide initially */
 `
 document.body.appendChild(selectionButton)
 
@@ -154,32 +180,6 @@ selectionButton.addEventListener("click", () => {
       composed: true
     })
   )
-})
-
-// Listen to mouseup for selection
-document.addEventListener("mouseup", (e) => {
-  if(!enabledRef.current) return;
-  logger.debug("[Synaptic AI] Mouseup event detected")
-  const selection = window.getSelection()?.toString()?.trim()
-  if (selection) {
-    selectedText = selection
-    positionSelectionButton()
-    showSelectionButton()
-  } else {
-    hideSelectionButton()
-  }
-})
-
-window.addEventListener("scroll", () => {
-  if (selectionButton.style.display !== "none") {
-    positionSelectionButton()
-  }
-})
-
-window.addEventListener("resize", () => {
-  if (selectionButton.style.display !== "none") {
-    positionSelectionButton()
-  }
 })
 
 function positionSelectionButton() {
