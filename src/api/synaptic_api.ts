@@ -1,6 +1,6 @@
 
 import { logger } from "~utils/logger"
-import type { AgentRequest, AgentResponse } from "../types/chat"
+import type { AgentRequest, AgentResponse } from "../lib/types/chat"
 
 const BASE_URL = process.env.PLASMO_PUBLIC_SYNAPTIC_API_URL || "http://localhost:3000"
 

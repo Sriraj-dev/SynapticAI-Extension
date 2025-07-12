@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react"
-import type { ChatMessage } from "~types/chat"
+import type { ChatMessage } from "~lib/types/chat"
 import { logger } from "~utils/logger"
 
 const STORAGE_KEY = "synaptic-ai-extension-chat-messages"

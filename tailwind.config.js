@@ -15,41 +15,88 @@ module.exports = {
         "2xl": "1400px",
       },
     },
+    text:{
+      DEFAULT: "var(--text-primary)"
+    },
     extend: {
+      fontFamily: {
+        sans: ['K2D', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
+          dimmed: "var(--primary-dimmed)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+
+        chat:{
+          message: "var(--chat-message)",
+        },
+        alternate:{
+          primary: "var(--alternate-primary)",
+          secondary: "var(--alternate-secondary)",
+        },
+        code:{
+          block: "var(--code-block)",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          foreground: "var(--muted-foreground)",
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+
+        percentage: {
+          filler : "var(--percentage-filler)",
         },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+        shimmer : "var(--shimmer)",
+
+        text:{
+          DEFAULT: "var(--text-primary)",
+          primary : "var(--text-primary)",
+          secondary : "var(--text-secondary)",
+          tertiary : "var(--text-tertiary)",
+          editor : "var(--text-editor)",
+          link : "var(--text-link)",
         },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+
+        lp:{
+          background: "var(--lp-background)",
+          primary: "var(--lp-primary)",
+          secondary: "var(--lp-secondary)",
+          text: {
+            primary: "var(--lp-text-primary)",
+            secondary: "var(--lp-text-secondary)",
+          },
         },
+
+        background: "var(--primary)",
+        foreground: "var(--primary-foreground)",
+
+        // destructive: {
+        //   DEFAULT: "hsl(var(--destructive))",
+        //   foreground: "hsl(var(--destructive-foreground))",
+        // },
+        
+        // accent: {
+        //   DEFAULT: "hsl(var(--accent))",
+        //   foreground: "hsl(var(--accent-foreground))",
+        // },
+        // popover: {
+        //   DEFAULT: "hsl(var(--popover))",
+        //   foreground: "hsl(var(--popover-foreground))",
+        // },
+        // card: {
+        //   DEFAULT: "hsl(var(--card))",
+        //   foreground: "hsl(var(--card-foreground))",
+        // },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -74,5 +121,6 @@ module.exports = {
   },
   plugins: [
     require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
   ],
 }
