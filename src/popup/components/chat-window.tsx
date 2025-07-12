@@ -74,6 +74,7 @@ export function ChatWindow({
       user={user}
       />
       <ChatInput
+        placeHolder="Got a question? Ask here..."
         isLoading={streaming}
         isAuthLoaded={isAuthLoaded}
         onSubmit={handleSubmit}

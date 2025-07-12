@@ -14,7 +14,7 @@ interface ChatBoxProps {
   streamMessage: string
   engagingMessage: string
   errorMessage: string
-  user: { fullName: string } | null
+  user: { fullName?: string } | null
 }
 
 export default function ChatBox({
@@ -134,7 +134,7 @@ export default function ChatBox({
       ) : (
         <div className="flex flex-col flex-1 justify-center items-center w-full">
           <span className={`text-text-primary text-xl`}>
-            Hello 👋, {user?.fullName}
+          Hello 👋{user?.fullName ? `, ${user?.fullName}` : `, Ready to learn something new?`}
           </span>
           {messages == undefined && (
             <div className="flex flex-row gap-2 items-center">

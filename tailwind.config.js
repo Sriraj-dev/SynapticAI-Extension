@@ -19,6 +19,9 @@ module.exports = {
       DEFAULT: "var(--text-primary)"
     },
     extend: {
+      // fontSize: {
+      //   lg: "var(--text-lg)",
+      // },
       fontFamily: {
         sans: ['K2D', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],

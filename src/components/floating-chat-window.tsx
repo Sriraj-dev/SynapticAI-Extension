@@ -1,38 +1,43 @@
-import { log } from "console"
-import { AnimatePresence, motion } from "framer-motion"
-import { Loader2, Paperclip, Send, X } from "lucide-react"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { motion } from "framer-motion"
+import { Paperclip, Send, SquarePen, X } from "lucide-react"
+import { useEffect, useState } from "react"
+import { ChatAPI } from "~api/chatapi"
+import { useChatManager } from "~hooks/useChatManager"
 
-import useChatSSE from "~hooks/useChatSSE"
+import ChatBox from "~popup/components/home/ChatBox"
+import { ChatInput } from "~popup/components/home/ChatInput"
+import Tooltip from "~popup/components/ui/ToolTip"
 import { logger } from "~utils/logger"
 
+async function getChatHistory(authToken : string) {
+  if (!authToken){
+    console.error("Not Authorized!")
+    return [];
+  }
+
+  const response = await ChatAPI.getChatHistory(authToken);
+
+  return response.chatHistory;
+}
+
 export const FloatingChatWindow = () => {
-  const [input, setInput] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
   const [authToken, setAuthToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [context, setContext] = useState<string | null>(null)
   const [isContextAttached, setIsContextAttached] = useState(false)
+  const [loadingMessages, setLoadingMessages] = useState<boolean>(true);
 
   const {
-    messages,
-    error,
-    isLoading: isChatLoading,
-    intermediaryMessage,
-    isWaitingForResponse,
-    askSynapticAI,
-    saveToStorage
-  } = useChatSSE()
-  
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages,isOpen])
+      setInitialMessages,
+      messages,
+      streaming,
+      streamMessage,
+      engagingMessage,
+      errorMessage,
+      sendMessage,
+      stop,
+    } = useChatManager([])
 
   const getToken = async () => {
     try {
@@ -52,6 +57,21 @@ export const FloatingChatWindow = () => {
     }
   }
 
+    useEffect(()=>{
+      getChatHistory(authToken)
+        .then((history)=>{
+          setInitialMessages(history);
+        })
+        .catch((err) => {
+          console.warn("Error in fetching the chat history ", err);
+          setInitialMessages([]);
+        })
+        .finally(() => {
+          setLoadingMessages(false)
+        });
+    }, [isOpen])
+
+  //To get the clerk token from background script
   useEffect(() => {
     getToken()
 
@@ -70,6 +90,7 @@ export const FloatingChatWindow = () => {
     }
   }, [])
 
+  //To get the context from the highlight button click
   useEffect(() => {
     const handleHighlightButtonClick = (e: Event) => {
       const customEvent = e as CustomEvent<{ context: string }>
@@ -93,16 +114,14 @@ export const FloatingChatWindow = () => {
     }
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isChatLoading || !authToken) return
+  const handleSubmit = async (userQuery: string) => {
+    if (!userQuery.trim() || streaming || !authToken) return
 
-    setInput("")
     const url = window.location.href
     const currentContext = context || ""
 
     await getToken()
-    await askSynapticAI(input.trim(), url, authToken, currentContext)
+    sendMessage(userQuery.trim(), url, currentContext, authToken)
 
     // Clear context after sending
     setContext(null)
@@ -114,16 +133,27 @@ export const FloatingChatWindow = () => {
     setIsContextAttached(false)
   }
 
-  const handleClose = async () => {
-    // Save messages to storage before closing
-    setIsOpen(false)
-    await saveToStorage()
+  const onClearChat = async ()=>{
+    console.log("clearing chat")
+    await getToken()
+    if(!authToken){
+      console.error("No Auth Token")
+      return;
+    }
+    const response = await ChatAPI.clearChat(authToken)
+
+    if(response){
+      setInitialMessages([]);
+    }else{
+      console.error("Couldnt clear the chat, please try again!")
+    }
   }
 
+  //TODO: Redesign this button
   if (isLoading) {
     return (
       <motion.div
-        whileHover={{ borderWidth: "2px" }}
+        whileHover={{ scale: 1.02 }}
         className="p-1 rounded-full transition-all duration-200 border-primary/30">
         <button
           style={{
@@ -146,12 +176,13 @@ export const FloatingChatWindow = () => {
     return null
   }
 
+  //TODO: Redesign this button
   if (!isOpen) {
     logger.debug("[Synaptic AI] Floating chat button showing...")
     return (
       <motion.div
-        whileHover={{ borderWidth: "2px" }}
-        className="p-1 rounded-full transition-all duration-200 border-primary/30">
+        whileHover={{ scale: 1.02 }}
+        className="p-1 rounded-full transition-all duration-200">
         <button
           onClick={() => {
             setIsOpen(true)
@@ -163,7 +194,7 @@ export const FloatingChatWindow = () => {
             lineHeight: "20px",
             padding: "8px 16px"
           }}
-          className="flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground shadow-xl hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all">
+          className="flex items-center justify-center gap-2 rounded-full shadow-xl transition-all bg-primary text-text-primary">
           <Send className="h-5 w-5" />
           <span>Ask Synaptic AI</span>
         </button>
@@ -178,157 +209,63 @@ export const FloatingChatWindow = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 100 }}
       transition={{ duration: 0.3 }}
-      className="flex flex-col w-[400px] h-[75vh] rounded-2xl shadow-lg bg-primary/90 backdrop-blur-lg border border-border/10 overflow-hidden">
+      className="flex flex-col w-[450px] h-[75vh] rounded-xl shadow-lg bg-primary backdrop-blur-lg overflow-hidden">
       {/* Header */}
       <div
         style={{
           height: "56px",
           minHeight: "56px"
         }}
-        className="flex items-center justify-between px-6 py-4 border-b-1 border-border shadow-lg bg-primary backdrop-blur-lg">
+        className="flex items-center justify-between px-6 py-4 border-b-1 border-text-tertiary shadow-lg bg-primary backdrop-blur-lg">
         <h3
           style={{
-            fontSize: "16px",
             lineHeight: "24px"
           }}
-          className="text-primary-foreground font-semibold tracking-tight">
+          className="text-text-primary text-lg font-semibold">
           Synaptic AI
         </h3>
+        <div className="flex gap-2 items-center">
+          <div
+            onClick={onClearChat}
+            className="rounded-full p-2 hover:bg-secondary-foreground cursor-pointer"
+          >
+            <SquarePen className="w-4 h-4 text-text-secondary" />
+          </div>
+
         <button
-          onClick={handleClose}
+          onClick={() => setIsOpen(false)}
           style={{
             width: "32px",
             height: "32px",
             padding: "6px"
           }}
-          className="rounded-full hover:bg-muted/60 transition-colors">
+          className="rounded-full hover:bg-secondary-foreground transition-colors">
           <X
             style={{
               width: "20px",
               height: "20px"
             }}
-            className="text-muted-foreground"
+            className="text-text-secondary"
           />
         </button>
+        </div>
       </div>
 
-      {/* Messages area - scrollable */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-primary/20 [&::-webkit-scrollbar-thumb]:bg-primary/40 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-primary/60">
-        <AnimatePresence>
-          {messages.map((message) => (
-            <motion.div
-              key={message.id}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                style={{
-                  fontSize: "14px",
-                  lineHeight: "20px",
-                  padding: "12px 20px",
-                  borderRadius: "16px"
-                }}
-                className={`group relative max-w-[80%] leading-relaxed whitespace-pre-wrap ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground"
-                }`}>
-                {message.content}
-                <span className="absolute -bottom-5 right-2 text-[10px] text-muted-foreground opacity-0 group-hover:opacity-70 transition-opacity">
-                  {formatTime(message.timestamp)}
-                </span>
-              </motion.div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {/* Error */}
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center">
-            <p className="text-sm text-destructive">{error}</p>
-          </motion.div>
-        )}
-
-        {/* Intermediary message */}
-        {intermediaryMessage && (
-          <motion.div
-            key={intermediaryMessage}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-            className={`flex justify-start`}>
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              style={{
-                fontSize: "14px",
-                lineHeight: "20px",
-                padding: "12px 20px",
-                borderRadius: "16px"
-              }}
-              className={`group relative max-w-[80%] leading-relaxed whitespace-pre-wrap bg-muted/80 text-foreground/70`}>
-              <div className="flex items-center gap-2">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                    ease: "linear"
-                  }}>
-                  <Loader2 className="h-4 w-4 text-muted-foreground/50" />
-                </motion.div>
-                {intermediaryMessage}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {/* Typing loader */}
-        {isChatLoading && !intermediaryMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-start">
-            <motion.div
-              className="relative max-w-[80%] px-4 py-2 bg-muted/60 rounded-2xl"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-              <div className="flex items-center gap-1 text-muted-foreground/50">
-                <motion.span
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: 0 }}>
-                  .
-                </motion.span>
-                <motion.span
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}>
-                  .
-                </motion.span>
-                <motion.span
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}>
-                  .
-                </motion.span>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
+      <ChatBox
+        messages={messages}
+        streaming={streaming}
+        streamMessage={streamMessage}
+        engagingMessage={engagingMessage}
+        errorMessage={errorMessage}
+        user={ null }
+      />
 
       {/* Context indicator and input form - fixed at bottom */}
       <div className="shrink-0 bg-primary backdrop-blur-md">
         {isContextAttached && context && (
           <div
             style={{ padding: "12px 16px" }}
-            className="px-6 py-2 border-t border-border/10">
+            className="px-6 py-2 border-t border-text-tertiary">
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1 flex items-center gap-2">
                 <Paperclip
@@ -338,17 +275,15 @@ export const FloatingChatWindow = () => {
                     minWidth: "14px",
                     minHeight: "14px"
                   }}
-                  className="text-primary-foreground/80"
+                  className="text-text-secondary"
                 />
-                <p
-                  style={{ fontSize: "12px" }}
-                  className="text-primary-foreground/80">
-                  Context attached
-                </p>
+                  <p style={{ fontSize: "12px" }} className="text-text-secondary">
+                    Context attached
+                  </p>
               </div>
               <button
                 onClick={removeContext}
-                className="p-1 hover:bg-primary/30 rounded-full transition-colors"
+                className="p-1 hover:bg-secondary-foreground rounded-full transition-colors"
                 title="Remove context">
                 <X
                   style={{
@@ -357,50 +292,21 @@ export const FloatingChatWindow = () => {
                     minWidth: "14px",
                     minHeight: "14px"
                   }}
-                  className="text-primary-foreground/60"
+                  className="text-text-secondary"
                 />
               </button>
             </div>
           </div>
         )}
-        <form
-          onSubmit={handleSubmit}
-          className="flex items-center gap-3 px-6 py-4">
-          <motion.input
-            whileFocus={{ scale: 1 }}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            style={{
-              height: "40px",
-              fontSize: "14px",
-              lineHeight: "20px"
-            }}
-            onKeyDown={(e)=>e.stopPropagation()}
-            onKeyUp={(e)=>e.stopPropagation()}
-            onKeyPress={(e)=>e.stopPropagation()}
-            className="flex-1 rounded-xl border border-muted-foreground bg-primary px-4 py-2.5 outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 text-primary-foreground"
-            disabled={isChatLoading || !authToken}
-          />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="submit"
-            disabled={!input.trim() || isChatLoading || !authToken}
-            style={{
-              width: "40px",
-              height: "40px"
-            }}
-            className="inline-flex items-center justify-center rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed">
-            <Send className="h-4 w-4" />
-          </motion.button>
-        </form>
+        <ChatInput
+            placeHolder="Need help with something here? Just ask..."
+            isLoading={streaming}
+            
+            isAuthLoaded={true}
+            onSubmit={handleSubmit}
+        />
       </div>
     </motion.div>
   )
 }
 
-const formatTime = (date: Date) => {
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-}

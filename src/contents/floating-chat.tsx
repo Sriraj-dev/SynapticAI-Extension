@@ -2,14 +2,8 @@ import tailwindCSS from "data-text:~styles/content_script.css";
 import type { PlasmoCSConfig } from "plasmo";
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-
-
-
 import { FloatingChatWindow } from "~components/floating-chat-window";
 import { logger } from "~utils/logger";
-
-
-
 
 
 export const config: PlasmoCSConfig = {
@@ -77,7 +71,7 @@ export default function FloatingChat() {
 //Create a element for showing a button when user highlights text
 const selectionButton = document.createElement("div")
 selectionButton.id = "synaptic-ai-highlight-button"
-selectionButton.innerText = "Add to Chat"
+selectionButton.innerText = "Ask SynapticAI"
 
 selectionButton.style.cssText = `
   position: absolute;
@@ -89,7 +83,7 @@ selectionButton.style.cssText = `
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  display: none; /* Hide initially */
+  display: none; /* Hide initially */ 
 `
 document.body.appendChild(selectionButton)
 
@@ -103,7 +97,7 @@ container.style.cssText = `
   z-index: 1000000;
   padding: 8px;
   overflow: visible;
-  display: none; //Will be triggered by enabling it from popup
+  display: none; /* Will be triggered by enabling it from popup */
 `
 
 // Create a shadow root
@@ -133,22 +127,6 @@ style.textContent = `
 const tailwindStyle = document.createElement("style")
 tailwindStyle.textContent = `
 ${tailwindCSS}
-
-.bg-primary {
-    background-color: hsl(var(--primary)) !important;
-    }
-    
-.text-primary-foreground {
-    color: hsl(var(--primary-foreground)) !important;
-    }
-        
-.border-primary\\/30 {
-    border-color: hsl(var(--primary) / 0.3) !important;
-    }
-    
-.hover\\:bg-primary\\/80:hover {
-    background-color: hsl(var(--primary) / 0.8) !important;
-    }
 `
 
 const appContainer = document.createElement("div")

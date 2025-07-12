@@ -3,14 +3,15 @@ import { MoveUp } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 interface ChatInputProps {
+  placeHolder: string
   isLoading: boolean
   isAuthLoaded: boolean
   onSubmit: (query: string) => Promise<void>
 }
 
-export function ChatInput({ isLoading, isAuthLoaded, onSubmit }: ChatInputProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+export function ChatInput({ placeHolder, isLoading, isAuthLoaded, onSubmit }: ChatInputProps) {
   const [input, setInput] = useState("")
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleInput = () => {
     const el = textareaRef.current
@@ -43,7 +44,7 @@ export function ChatInput({ isLoading, isAuthLoaded, onSubmit }: ChatInputProps)
           rows={1}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Got a question? Ask here..."
+          placeholder={placeHolder}
           className="flex-1 rounded-xl bg-primary-foreground text-text-primary px-3 py-2 text-sm outline-none placeholder:text-text-tertiary resize-none overflow-y-auto textbox-scrollbar"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
