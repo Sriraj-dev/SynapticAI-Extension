@@ -37,7 +37,7 @@ export const FloatingChatWindow = () => {
   const getToken = async () => {
     try {
       logger.debug("[Synaptic AI] Getting token from floating chat window")
-      chrome.runtime.sendMessage({ greeting: "get-token" }, (response) => {
+      chrome.runtime.sendMessage({ type: "get-token" }, (response) => {
         logger.debug(
           "[Synaptic AI] Token received from floating chat window",
           response

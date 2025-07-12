@@ -1,5 +1,5 @@
 import { useState } from "react"
-import type { AgentRequest, AgentResponse, ChatMessage } from "~types/chat"
+import type { AgentRequest, AgentResponse, ChatMessage } from "~lib/types/chat"
 import { fetchAgentResponse } from "~api/synaptic_api"
 import { usePersistentChat } from "./usePersistentChat"
 import { logger } from "~utils/logger"
