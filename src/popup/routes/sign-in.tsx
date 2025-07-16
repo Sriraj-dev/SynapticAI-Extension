@@ -1,7 +1,8 @@
 import { ThemeProvider } from "~popup/components/theme-provider"
 import { ThemeToggle } from "~popup/components/theme-toggle"
 
-const dashboardLink = process.env.PLASMO_PUBLIC_CLERK_SYNC_HOST || "https://development.synapticai.app"
+const dashboardLink =
+  process.env.PLASMO_PUBLIC_SYNAPTIC_WEBSITE_URL || "https://synapticai.app"
 
 export const SignInPage = () => {
   return (
@@ -9,22 +10,28 @@ export const SignInPage = () => {
       <div className="h-[400px] flex flex-col min-w-96 rounded-xl shadow-md bg-background">
         <div className="flex items-center justify-between px-4 py-4">
           <ThemeToggle />
-          <h1 className="text-lg font-semibold text-center flex-1 -ml-8">
-            Synaptic AI
-          </h1>
+          <a
+            href={dashboardLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 -ml-8">
+            <h1 className="text-lg font-semibold text-center hover:underline cursor-pointer hover:scale-110 transition-transform">
+              Synaptic AI
+            </h1>
+          </a>
         </div>
 
         <div className="flex-1 flex items-center justify-center px-4">
-          <p className="text-secondary-foreground text-center text-sm">
-            Please sign in from the{" "}
+          <p className="text-text-secondary text-center text-sm">
+            Just one step left!{"   "}Log in on the{" "}
             <a
               href={dashboardLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 underline hover:text-blue-800">
-              dashboard
+              className="text-text-link underline hover:text-blue-600">
+              SynapticAI
             </a>{" "}
-            to start using Synaptic AI.
+            website, then come back here to start using the extension 🚀
           </p>
         </div>
       </div>

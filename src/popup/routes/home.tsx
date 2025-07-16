@@ -12,6 +12,9 @@ import { ThemeProvider } from "../components/theme-provider"
 import { ThemeToggle } from "../components/theme-toggle"
 import FloatingChatToggle from "../components/ui/AssistantToggle"
 
+const dashboardLink =
+  process.env.PLASMO_PUBLIC_SYNAPTIC_WEBSITE_URL || "https://synapticai.app"
+
 export const Home = () => {
   const { getToken } = useAuth()
 
@@ -66,7 +69,15 @@ export const Home = () => {
           <div className="flex items-center">
             <ThemeToggle />
           </div>
-          <h1 className="text-center text-lg font-semibold">Synaptic AI</h1>
+          <a
+            href={dashboardLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 -ml-8">
+            <h1 className="text-lg font-semibold text-center hover:underline cursor-pointer hover:scale-110 transition-transform">
+              Synaptic AI
+            </h1>
+          </a>
           <UserButton />
         </div>
 
