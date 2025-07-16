@@ -2,11 +2,15 @@ import { AnimatePresence, motion } from "framer-motion"
 import { Copy, Loader2 } from "lucide-react"
 import { useEffect, useRef } from "react"
 import { toast } from "sonner"
+import animabot from "~/assets/lottie/anima-bot.json"
+import chatbotDP from "~/assets/lottie/chatbotDP.json"
+
 
 import type { NewChatMessage } from "~lib/types/response_types"
 
 import { MarkdownRenderer } from "../../../components/ui/MarkdownRenderer"
 import ReferenceCard from "../ui/ReferenceCard"
+import Lottie from "lottie-react"
 
 interface ChatBoxProps {
   messages: NewChatMessage[] | undefined
@@ -14,7 +18,7 @@ interface ChatBoxProps {
   streamMessage: string
   engagingMessage: string
   errorMessage: string
-  user: { fullName: string } | null
+  user: { fullName?: string } | null
 }
 
 export default function ChatBox({
@@ -61,8 +65,8 @@ export default function ChatBox({
                     className={`flex flex-col gap-1 text-sm
                     ${
                       msg.role.startsWith("AIMessage")
-                        ? "bg-primary mr-auto max-w-[80%] text-text-primary p-2 rounded-3xl"
-                        : "bg-chat-message ml-auto max-w-[80%] text-text-primary p-2 px-4 rounded-3xl shadow"
+                        ? "bg-primary mr-auto max-w-[80%] text-text-primary p-xs rounded-3xl"
+                        : "bg-chat-message ml-auto max-w-[80%] text-text-primary p-xxs px-sm rounded-3xl shadow"
                     }
                   `}>
                     {/* TODO: Display the links if the Message contains any */}
@@ -88,16 +92,19 @@ export default function ChatBox({
                           ))}
                         </div>
                       )}
-                    <MarkdownRenderer markdown={msg.content} />
+                    <div className="flex flex-row align-top">
+                      {msg.role.startsWith("AIMessage") && <Lottie animationData={chatbotDP} className="h-chatbotdp w-chatbotdp flex-shrink-0" loop autoplay />}
+                      <MarkdownRenderer markdown={msg.content} />
+                    </div>
                     {/* {msg.content} */}
                     {msg.role.startsWith("AIMessage") &&
                       msg.content.length > 0 && (
                         <div
                           onClick={() => handleCopy(msg.content)}
                           className="
-                            flex flex-row gap-2 items-center self-start mt-1 bg-primary-foreground text-text-primary text-xs px-3 py-2 rounded-2xl hover:bg-secondary cursor-pointer
+                            flex flex-row gap-2 items-center self-start mt-1 bg-primary-foreground text-text-primary text-xs px-xs py-xxs rounded-2xl hover:bg-secondary cursor-pointer
                         ">
-                          <Copy className="w-3 h-3" />
+                          <Copy className="w-xs h-xs" />
                           Copy
                         </div>
                       )}
@@ -106,8 +113,10 @@ export default function ChatBox({
             )}
             {streaming && streamMessage.length > 0 && (
               <div className="text-sm bg-primary mr-auto max-w-[80%] text-text-primary p-2 rounded-3xl shadow">
-                {/* <MarkdownRenderer markdown={streamMessage} /> */}
-                {streamMessage}
+                <div className="flex flex-row align-top">
+                  <Lottie animationData={chatbotDP} className="h-chatbotdp w-chatbotdp flex-shrink-0" loop autoplay />
+                  <MarkdownRenderer markdown={streamMessage} />
+                </div>
               </div>
             )}
             {streaming && engagingMessage.length == 0 && (
@@ -133,8 +142,9 @@ export default function ChatBox({
         </AnimatePresence>
       ) : (
         <div className="flex flex-col flex-1 justify-center items-center w-full">
+          <Lottie animationData={chatbotDP} className="h-chatbot w-chatbot" loop autoplay />
           <span className={`text-text-primary text-xl`}>
-            Hello 👋, {user?.fullName}
+          Hello 👋{user?.fullName ? `, ${user?.fullName}` : `, Ready to learn something new?`}
           </span>
           {messages == undefined && (
             <div className="flex flex-row gap-2 items-center">

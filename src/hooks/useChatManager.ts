@@ -89,20 +89,23 @@ export function useChatManager(initialMessages : NewChatMessage[] = []) {
                     default:
                         console.log("Unknown event type : ", msg)
                 }
+            },
+            on429Error: ()=>{
+                onError("Whoa! you have reached your daily limit. Consider Upgrading your plan or try again tomorrow")
             }
         })
 
     }catch(err){
         console.error("Error in processing the request : ", err)
-        onError("")
+        onError()
     }finally{
         setStreaming(false)
         setStreamMessage("")
     }
   }
 
-  function onError(err : string){
-    setErrorMessage("We have encountered an issue while processing your request. Please try again!")
+  function onError(err? : string){
+    setErrorMessage((err) ? err : "We have encountered an issue while processing your request. Please try again!")
     console.error("Error in processing the request : ", err)
 
     if(streamMessage.trim().length > 0){

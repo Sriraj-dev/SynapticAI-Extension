@@ -42,6 +42,9 @@
     --lp-text-secondary: #ffffff;
 
     --border: #d0d0d0;
+    --text-lg: 16px;
+    --text-xl: 18px;
+
   }
  
   .dark {
@@ -78,6 +81,9 @@
   
     --lp-text-primary: #fffaea;
     --lp-text-secondary: #0e1114;
+
+    --text-lg: 16px;
+    --text-xl: 18px;
   }
 }
 

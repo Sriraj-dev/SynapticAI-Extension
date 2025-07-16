@@ -1,10 +1,8 @@
 import { useAuth } from "@clerk/chrome-extension"
 import { useUser } from "@clerk/chrome-extension"
 import { ChatInput } from "./home/ChatInput"
-import useChatSSE  from "~hooks/useChatSSE"
 import { useEffect, useState } from "react"
 import { ChatAPI } from "~api/chatapi"
-import { useChatManager } from "~hooks/useChatManager"
 import ChatBox from "./home/ChatBox"
 
 async function getChatHistory(getToken: any) {
@@ -47,7 +45,13 @@ export function ChatWindow({
       });
   }, [getToken])
 
-  if(loadingMessages) return <div className="flex h-full flex-col items-center justify-center">Loading...</div>
+  if (loadingMessages) {
+    return (
+      <div className="flex items-center justify-center h-[75vh]">
+          <div className="h-[24px] w-[24px] rounded-full bg-secondary-foreground animate-spin"></div>
+        </div>
+    )
+  }
 
   const handleSubmit = async (userQuery: string) => {
     if (!userQuery.trim() || streaming) return
@@ -74,6 +78,7 @@ export function ChatWindow({
       user={user}
       />
       <ChatInput
+        placeHolder="Got a question? Ask here..."
         isLoading={streaming}
         isAuthLoaded={isAuthLoaded}
         onSubmit={handleSubmit}
