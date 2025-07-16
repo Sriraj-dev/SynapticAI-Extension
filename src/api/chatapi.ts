@@ -59,13 +59,13 @@ export const ChatAPI = {
         userRequest,
         signal,
         onMessage,
-        onError
+        on429Error
       }: {
         authToken: string;
         userRequest: ChatRequest;
         signal: AbortSignal;
         onMessage: (msg: SSEMessage) => void;
-        onError?: (err: any) => void;
+        on429Error?: (err: any) => void;
       }){
         try{
             const response = await fetch(`${BASE_URL}${Endpoints.askAI}`, {
@@ -77,6 +77,16 @@ export const ChatAPI = {
                 body: JSON.stringify(userRequest),
                 signal: signal,
             });
+
+            if (response.status === 429 && on429Error) {
+                const error = await response.text();
+                on429Error(error);
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
 
             if (!response.body) {
                 throw new Error("No response body");
@@ -107,16 +117,14 @@ export const ChatAPI = {
                             onMessage(sseMessage)
                         }catch(err){
                             console.error("JSON parsing failed : ", err)
-                            if (onError) onError(err);
-                            else throw err;
+                            throw err;
                         }
                     }
                 }
             }
         }catch(err){
             console.error("Failed to fetch response from SynapticAI ", err)
-            if (onError) onError(err);
-            else throw err;
+            throw err;
         }
     }
 

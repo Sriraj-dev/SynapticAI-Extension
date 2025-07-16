@@ -1,94 +1,84 @@
 import { motion } from "framer-motion"
-import { Paperclip, Send, SquarePen, X } from "lucide-react"
+import { BotMessageSquare, Paperclip, Send, SquarePen, X } from "lucide-react"
 import { useEffect, useState } from "react"
+
 import { ChatAPI } from "~api/chatapi"
 import { useChatManager } from "~hooks/useChatManager"
-
 import ChatBox from "~popup/components/home/ChatBox"
 import { ChatInput } from "~popup/components/home/ChatInput"
-import Tooltip from "~popup/components/ui/ToolTip"
 import { logger } from "~utils/logger"
 
-async function getChatHistory(authToken : string) {
-  if (!authToken){
+import { FAB } from "./ChatComponents/FAB"
+
+async function getChatHistory(authToken: string) {
+  if (!authToken) {
     console.error("Not Authorized!")
-    return [];
+    return []
   }
 
-  const response = await ChatAPI.getChatHistory(authToken);
+  const response = await ChatAPI.getChatHistory(authToken)
 
-  return response.chatHistory;
+  return response.chatHistory
 }
 
 export const FloatingChatWindow = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [authToken, setAuthToken] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [context, setContext] = useState<string | null>(null)
   const [isContextAttached, setIsContextAttached] = useState(false)
-  const [loadingMessages, setLoadingMessages] = useState<boolean>(true);
+  const [loadingMessages, setLoadingMessages] = useState<boolean>(false)
 
   const {
-      setInitialMessages,
-      messages,
-      streaming,
-      streamMessage,
-      engagingMessage,
-      errorMessage,
-      sendMessage,
-      stop,
-    } = useChatManager([])
+    setInitialMessages,
+    messages,
+    streaming,
+    streamMessage,
+    engagingMessage,
+    errorMessage,
+    sendMessage,
+    stop
+  } = useChatManager([])
 
-  const getToken = async () => {
-    try {
-      logger.debug("[Synaptic AI] Getting token from floating chat window")
-      chrome.runtime.sendMessage({ type: "get-token" }, (response) => {
-        logger.debug(
-          "[Synaptic AI] Token received from floating chat window",
-          response
+
+  const getToken = async (): Promise<string | null> => {
+    logger.debug("[Synaptic AI] Requesting token from background script")
+  
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage(
+          { type: "synaptic-ai-encrypted-token" },
+          (response) => {
+            resolve(response?.token || null)
+          }
         )
-        setAuthToken(response?.token || null)
-      })
-    } catch (error) {
-      logger.warn("[Synaptic AI] Error getting auth token:", error)
-      setAuthToken(null)
-    } finally {
-      setIsLoading(false)
-    }
+      } catch (error) {
+        logger.warn("[Synaptic AI] Error getting auth token:", error)
+        resolve(null)
+      }
+    })
   }
 
-    useEffect(()=>{
-      getChatHistory(authToken)
-        .then((history)=>{
-          setInitialMessages(history);
-        })
-        .catch((err) => {
-          console.warn("Error in fetching the chat history ", err);
-          setInitialMessages([]);
-        })
-        .finally(() => {
-          setLoadingMessages(false)
-        });
-    }, [isOpen])
-
-  //To get the clerk token from background script
+  //To get the users Chat History
   useEffect(() => {
-    getToken()
-
-    // // Listen for storage changes
-    const handleStorageChange = (changes: {
-      [key: string]: chrome.storage.StorageChange
-    }) => {
-      if (changes["synaptic-ai-authToken"]) {
-        getToken()
+    const fetchData = async () => {
+      try {
+        const authToken = await getToken()
+  
+        const history = await getChatHistory(authToken)
+        setInitialMessages(history)
+      } catch (err) {
+        console.warn("Error in fetching the chat history ", err)
+        setInitialMessages([])
+      } finally {
+        setLoadingMessages(false)
       }
     }
-
-    chrome.storage.onChanged.addListener(handleStorageChange)
-    return () => {
-      chrome.storage.onChanged.removeListener(handleStorageChange)
+  
+    if (isOpen) {
+      setLoadingMessages(true)
+      fetchData()
     }
-  }, [])
+  }, [isOpen])
+
 
   //To get the context from the highlight button click
   useEffect(() => {
@@ -115,17 +105,16 @@ export const FloatingChatWindow = () => {
   }, [])
 
   const handleSubmit = async (userQuery: string) => {
-    if (!userQuery.trim() || streaming || !authToken) return
+    if (!userQuery.trim() || streaming || loadingMessages) return
 
     const url = window.location.href
     const currentContext = context || ""
 
-    await getToken()
+    const authToken = await getToken()
     sendMessage(userQuery.trim(), url, currentContext, authToken)
 
     // Clear context after sending
-    setContext(null)
-    setIsContextAttached(false)
+    removeContext()
   }
 
   const removeContext = () => {
@@ -133,76 +122,34 @@ export const FloatingChatWindow = () => {
     setIsContextAttached(false)
   }
 
-  const onClearChat = async ()=>{
+  const onClearChat = async () => {
     console.log("clearing chat")
-    await getToken()
-    if(!authToken){
+    setLoadingMessages(true)
+
+    const authToken = await getToken()
+    if (!authToken) {
       console.error("No Auth Token")
-      return;
+      return
     }
+
     const response = await ChatAPI.clearChat(authToken)
 
-    if(response){
-      setInitialMessages([]);
-    }else{
+    if (response) {
+      setInitialMessages([])
+    } else {
       console.error("Couldnt clear the chat, please try again!")
     }
+    setLoadingMessages(false)
   }
 
-  //TODO: Redesign this button
-  if (isLoading) {
-    return (
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        className="p-1 rounded-full transition-all duration-200 border-primary/30">
-        <button
-          style={{
-            width: "180px",
-            height: "40px",
-            fontSize: "14px",
-            lineHeight: "20px",
-            padding: "8px 16px"
-          }}
-          className="flex items-center justify-center gap-2 rounded-full bg-primary text-primary-foreground shadow-xl hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all">
-          <Send className="h-5 w-5" />
-          <span>Loading...</span>
-        </button>
-      </motion.div>
-    )
+  if (loadingMessages && !isOpen) {
+    return <FAB title="Loading..." onOpen={() => {}} />
   }
 
-  if (!authToken) {
-    logger.debug("[Synaptic AI]: No auth token found!")
-    return null
-  }
-
-  //TODO: Redesign this button
   if (!isOpen) {
-    logger.debug("[Synaptic AI] Floating chat button showing...")
-    return (
-      <motion.div
-        whileHover={{ scale: 1.02 }}
-        className="p-1 rounded-full transition-all duration-200">
-        <button
-          onClick={() => {
-            setIsOpen(true)
-          }}
-          style={{
-            width: "180px",
-            height: "40px",
-            fontSize: "14px",
-            lineHeight: "20px",
-            padding: "8px 16px"
-          }}
-          className="flex items-center justify-center gap-2 rounded-full shadow-xl transition-all bg-primary text-text-primary">
-          <Send className="h-5 w-5" />
-          <span>Ask Synaptic AI</span>
-        </button>
-      </motion.div>
-    )
+    return <FAB title="Ask Synaptic AI" onOpen={() => setIsOpen(true)} />
   }
 
-  logger.debug("FloatingChatWindow: Showing chat box")
   return (
     <motion.div
       initial={{ opacity: 0, y: 100 }}
@@ -216,49 +163,47 @@ export const FloatingChatWindow = () => {
           height: "56px",
           minHeight: "56px"
         }}
-        className="flex items-center justify-between px-6 py-4 border-b-1 border-text-tertiary shadow-lg bg-primary backdrop-blur-lg">
+        className="flex items-center justify-between px-xl py-base border-b-1 border-text-tertiary shadow-lg bg-primary backdrop-blur-lg">
         <h3
           style={{
             lineHeight: "24px"
           }}
-          className="text-text-primary text-lg font-semibold">
+          className="text-text-primary text-lg font-sans">
           Synaptic AI
         </h3>
         <div className="flex gap-2 items-center">
           <div
             onClick={onClearChat}
-            className="rounded-full p-2 hover:bg-secondary-foreground cursor-pointer"
-          >
-            <SquarePen className="w-4 h-4 text-text-secondary" />
+            className="rounded-full p-2 hover:bg-secondary-foreground cursor-pointer">
+            <SquarePen className="w-icon h-icon text-text-secondary" />
           </div>
 
-        <button
-          onClick={() => setIsOpen(false)}
-          style={{
-            width: "32px",
-            height: "32px",
-            padding: "6px"
-          }}
-          className="rounded-full hover:bg-secondary-foreground transition-colors">
-          <X
+          <button
+            onClick={() => setIsOpen(false)}
             style={{
-              width: "20px",
-              height: "20px"
+              padding: "6px"
             }}
-            className="text-text-secondary"
-          />
-        </button>
+            className="w-btn h-btn rounded-full hover:bg-secondary-foreground transition-colors items-center justify-center">
+            <X className="w-icon h-icon text-text-secondary" />
+          </button>
         </div>
       </div>
 
-      <ChatBox
+      {loadingMessages && (
+        <div className="flex items-center justify-center h-[75vh]">
+          <div className="h-[24px] w-[24px] rounded-full bg-secondary-foreground animate-spin"></div>
+        </div>
+      )}
+      
+      { !loadingMessages && <ChatBox
         messages={messages}
         streaming={streaming}
         streamMessage={streamMessage}
         engagingMessage={engagingMessage}
         errorMessage={errorMessage}
-        user={ null }
-      />
+        user={null}
+      />}
+
 
       {/* Context indicator and input form - fixed at bottom */}
       <div className="shrink-0 bg-primary backdrop-blur-md">
@@ -277,9 +222,9 @@ export const FloatingChatWindow = () => {
                   }}
                   className="text-text-secondary"
                 />
-                  <p style={{ fontSize: "12px" }} className="text-text-secondary">
-                    Context attached
-                  </p>
+                <p style={{ fontSize: "12px" }} className="text-text-secondary">
+                  Context attached
+                </p>
               </div>
               <button
                 onClick={removeContext}
@@ -299,14 +244,12 @@ export const FloatingChatWindow = () => {
           </div>
         )}
         <ChatInput
-            placeHolder="Need help with something here? Just ask..."
-            isLoading={streaming}
-            
-            isAuthLoaded={true}
-            onSubmit={handleSubmit}
+          placeHolder="Need help with something here? Just ask..."
+          isLoading={streaming}
+          isAuthLoaded={true}
+          onSubmit={handleSubmit}
         />
       </div>
     </motion.div>
   )
 }
-

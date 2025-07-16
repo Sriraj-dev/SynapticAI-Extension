@@ -19,9 +19,29 @@ module.exports = {
       DEFAULT: "var(--text-primary)"
     },
     extend: {
-      // fontSize: {
-      //   lg: "var(--text-lg)",
-      // },
+      spacing: {
+        'btn': '32px',      // or use '2rem'
+        'icon': '16px',     // icon size
+        xxs: 8,
+        xs: 12,
+        sm: 14,
+        base: 16,
+        lg: 18,
+        xl: 20,
+        "2xl": 24,
+        "3xl": 30,
+        chatbotdp: '33px',
+        chatbot: '140px'
+      },
+      fontSize: {
+        xs: 12,
+        sm: 14,
+        base: 16,
+        lg: 18,
+        xl: 20,
+        "2xl": 24,
+        "3xl": 30
+      },
       fontFamily: {
         sans: ['K2D', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
@@ -120,6 +140,9 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+    },
+    corePlugins: {
+      preflight: true
     },
   },
   plugins: [

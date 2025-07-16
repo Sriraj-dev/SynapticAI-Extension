@@ -1,17 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=K2D&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=K2D&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
 
 /* Base styles */
-#synaptic-ai-app-chatbox, #synaptic-ai-app-chatbox *{
+#synaptic-ai-app-chatbox,
+#synaptic-ai-app-chatbox * {
   contain: content;
 }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
-  #synaptic-ai-app-chatbox.dark  {
+  #synaptic-ai-app-chatbox.dark {
     --font-k2d: var(--font-k2d), system-ui, sans-serif;
 
     --primary: #191919;
@@ -21,36 +22,38 @@
     --alternate-primary: #d87620;
     --secondary: #202020;
     --secondary-foreground: #2e2e2e;
-  
+
     --chat-message: #2a2a2a;
     --alternate-secondary: #2a2a2a;
     --code-block: #141414;
-  
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: #2a2a2a;
-  
+
     --percentage-filler: #bb88cc;
     --upgrade-plan-secondary: #5c3b23;
     --shimmer: #e0e0e0;
-  
+
     --text-primary: #d9d9d9;
     --text-secondary: #acacac;
     --text-tertiary: #6b6b6b;
     --text-editor: #d4d4d4;
     --text-link: #bb88cc;
-  
+
     --lp-background: #0e1114;
     --lp-primary: #62f6b5;
     --lp-secondary: #fffaea;
     --border: #6b6b6b;
-  
+
     --lp-text-primary: #fffaea;
     --lp-text-secondary: #0e1114;
 
-    --text-lg: 16px
+    --text-lg: 16px;
+    --text-xl: 18px;
   }
- 
-  :root,#synaptic-ai-app-chatbox{
+
+  :root,
+  #synaptic-ai-app-chatbox {
     --font-k2d: var(--font-k2d), system-ui, sans-serif;
 
     --primary: #191919;
@@ -60,33 +63,43 @@
     --alternate-primary: #d87620;
     --secondary: #202020;
     --secondary-foreground: #2e2e2e;
-  
+
     --chat-message: #2a2a2a;
     --alternate-secondary: #2a2a2a;
     --code-block: #141414;
-  
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: #2a2a2a;
-  
+
     --percentage-filler: #bb88cc;
     --upgrade-plan-secondary: #5c3b23;
     --shimmer: #e0e0e0;
-  
+
     --text-primary: #d9d9d9;
     --text-secondary: #acacac;
     --text-tertiary: #6b6b6b;
     --text-editor: #d4d4d4;
     --text-link: #bb88cc;
-  
+
     --lp-background: #0e1114;
     --lp-primary: #62f6b5;
     --lp-secondary: #fffaea;
     --border: #6b6b6b;
-  
+
     --lp-text-primary: #fffaea;
     --lp-text-secondary: #0e1114;
 
-    --text-lg: 16px
+    --text-lg: 16px;
+    --text-xl: 18px;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0px rgba(187, 136, 204, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(187, 136, 204, 0.9);
   }
 }
 
@@ -112,7 +125,7 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
- 
+
 @layer base {
   * {
     @apply border-border;

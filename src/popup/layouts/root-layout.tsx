@@ -16,23 +16,6 @@ if (!SYNC_HOST) {
   logger.warn("Missing PLASMO_PUBLIC_CLERK_SYNC_HOST")
 }
 
-function MessageHandler() {
-  const { authToken } = useAuthToken()
-
-  useEffect(() => {
-    const updateStorage = async () => {
-      if (authToken) {
-        await chrome.storage.local.set({ "synaptic-ai-authToken": authToken })        
-      } else {
-        await chrome.storage.local.remove("synaptic-ai-authToken")
-      }
-    }
-    updateStorage()
-  }, [authToken])
-
-  return null
-}
-
 export const RootLayout = () => {
   const navigate = useNavigate()
 
@@ -56,7 +39,6 @@ export const RootLayout = () => {
       publishableKey={PUBLISHABLE_KEY}
       syncHost={SYNC_HOST}>
       <AuthProvider>
-        <MessageHandler />
         <div>
           <Outlet />
         </div>

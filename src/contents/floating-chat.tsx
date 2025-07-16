@@ -1,10 +1,10 @@
-import tailwindCSS from "data-text:~styles/content_script.css";
-import type { PlasmoCSConfig } from "plasmo";
-import { useEffect, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
-import { FloatingChatWindow } from "~components/floating-chat-window";
-import { logger } from "~utils/logger";
+import tailwindCSS from "data-text:~styles/content_script.css"
+import type { PlasmoCSConfig } from "plasmo"
+import { useEffect, useRef, useState } from "react"
+import { createRoot } from "react-dom/client"
 
+import { FloatingChatWindow } from "~components/floating-chat-window"
+import { logger } from "~utils/logger"
 
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"]
@@ -18,36 +18,38 @@ export default function FloatingChat() {
 
   useEffect(() => {
     chrome.storage.local
-      .get("synaptic-ai-floating-chat-enabled")
+      .get("synaptic-ai-web-assistant-enabled")
       .then((result) => {
-        if (result["synaptic-ai-floating-chat-enabled"]) {
+        if (result["synaptic-ai-web-assistant-enabled"]) {
           container.style.display = "block"
           enabledRef.current = true
         } else {
           container.style.display = "none"
         }
       })
-    // Listen for messages from the popup
-    const handleMessage = (message: any) => {
-      if (message.type === "TOGGLE_SYNAPTICAI_FLOATING_CHAT") {
-        enabledRef.current = message.enabled
-        if (!message.enabled) {
-          container.style.display = "none"
-        } else {
-          container.style.display = "block"
-        }
+
+    // ✅ Listen for storage changes
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange }
+    ) => {
+      console.log("Storage change recieved")
+      if (changes["synaptic-ai-web-assistant-enabled"]) {
+        const newValue = changes["synaptic-ai-web-assistant-enabled"].newValue
+        enabledRef.current = newValue
+        container.style.display = newValue ? "block" : "none"
       }
     }
 
-    chrome.runtime.onMessage.addListener(handleMessage)
+    chrome.storage.onChanged.addListener(handleStorageChange)
+
     return () => {
-      chrome.runtime.onMessage.removeListener(handleMessage)
+      chrome.storage.onChanged.removeListener(handleStorageChange)
     }
   }, [])
 
   useEffect(() => {
     const handleMouseUp = (_) => {
-      if(!enabledRef.current) return 
+      if (!enabledRef.current) return
       logger.debug("[Synaptic AI] Mouseup event detected")
       const selection = window.getSelection()?.toString()?.trim()
       if (selection) {
@@ -116,6 +118,10 @@ style.textContent = `
     margin: 0;
     padding: 0;
   }
+  
+  body {
+    @apply bg-background text-text-primary font-sans;
+  }
     
   #synaptic-ai-app-chatbox {
     position: relative;
@@ -127,6 +133,10 @@ style.textContent = `
 const tailwindStyle = document.createElement("style")
 tailwindStyle.textContent = `
 ${tailwindCSS}
+
+body {
+    @apply bg-background text-text-primary font-sans;
+}
 `
 
 const appContainer = document.createElement("div")
@@ -141,7 +151,7 @@ document.body.appendChild(container)
 
 // Render the floating chat in the shadow DOM
 const root = createRoot(appContainer)
-root.render(<FloatingChatWindow />)
+root.render(<FloatingChatWindow/>)
 
 let selectedText = ""
 

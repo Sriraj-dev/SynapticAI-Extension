@@ -24,7 +24,7 @@ async function getToken() {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if(request.type === "get-token"){
+  if(request.type === "synaptic-ai-encrypted-token"){
     getToken()
       .then((token) => sendResponse({ token }))
       .catch((error) => {

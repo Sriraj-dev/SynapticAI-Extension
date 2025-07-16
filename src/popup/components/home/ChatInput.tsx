@@ -67,9 +67,9 @@ export function ChatInput({ placeHolder, isLoading, isAuthLoaded, onSubmit }: Ch
             textareaRef.current.value = ""
           }
         }}
-        className="rounded-full inline-flex h-8 w-8 items-center justify-center bg-percentage-filler text-white disabled:opacity-70 disabled:cursor-not-allowed"
+        className="rounded-full inline-flex h-btn w-btn items-center justify-center bg-percentage-filler text-white disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        <MoveUp className="h-4 w-4" />
+        <MoveUp className="h-icon w-icon" />
       </motion.button>
     </div>
   )
