@@ -1,7 +1,7 @@
 {
   "name": "synaptic-ai-extension",
   "displayName": "Synaptic AI",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Transform your thoughts into intelligence with Synaptic AI",
   "author": "Sriraj-Dev. <Psriraj1902@gmail.com>",
   "scripts": {
@@ -48,7 +48,7 @@
   },
   "manifest": {
     "host_permissions": [
-      "$PLASMO_PUBLIC_CLERK_SYNC_HOST/*"
+      "$PLASMO_PUBLIC_CLERK_SYNC_HOST/*", "$CLERK_FRONTEND_API/*"
     ],
     "permissions": [
       "storage",
