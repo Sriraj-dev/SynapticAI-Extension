@@ -96,24 +96,24 @@ export const Home = () => {
         </div>
 
         <div className="flex-1 overflow-hidden">
-          {isSignedIn ? (
-            <ChatWindow
-              setInitialMessages={setInitialMessages}
-              messages={messages}
-              streaming={streaming}
-              streamMessage={streamMessage}
-              engagingMessage={engagingMessage}
-              errorMessage={errorMessage}
-              sendMessage={sendMessage}
-              stop={stop}
-            />
+          <ChatWindow
+            setInitialMessages={setInitialMessages}
+            messages={messages}
+            streaming={streaming}
+            streamMessage={streamMessage}
+            engagingMessage={engagingMessage}
+            errorMessage={errorMessage}
+            sendMessage={sendMessage}
+            stop={stop}
+          />
+          {/* {isSignedIn ? (
           ) : (
             <div className="flex h-full items-center justify-center">
               <p className="text-text-secondary text-center">
                 Sign in to start chatting with Synaptic AI
               </p>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </ThemeProvider>

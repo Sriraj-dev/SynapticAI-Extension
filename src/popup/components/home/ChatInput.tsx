@@ -49,6 +49,7 @@ export function ChatInput({ placeHolder, isLoading, isAuthLoaded, onSubmit }: Ch
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault()
+              if(isLoading || !isAuthLoaded) return
               handleSubmit(textareaRef.current?.value || "")
               if (textareaRef.current) {
                 textareaRef.current.value = ""

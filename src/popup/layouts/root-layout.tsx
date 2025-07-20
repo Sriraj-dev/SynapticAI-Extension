@@ -1,8 +1,10 @@
-import { ClerkProvider } from "@clerk/chrome-extension"
+import { ClerkLoading, ClerkProvider, SignedIn, SignedOut } from "@clerk/chrome-extension"
 import { useEffect } from "react"
 import { Outlet, useNavigate } from "react-router"
 
 import { AuthProvider, useAuthToken } from "~contexts/auth-context"
+import { Home } from "~popup/routes/home"
+import { SignInPage } from "~popup/routes/sign-in"
 import { logger } from "~utils/logger"
 
 const PUBLISHABLE_KEY = process.env.PLASMO_PUBLIC_CLERK_PUBLISHABLE_KEY
@@ -40,7 +42,15 @@ export const RootLayout = () => {
       syncHost={SYNC_HOST}>
       <AuthProvider>
         <div>
-          <Outlet />
+          <ClerkLoading>
+            <Home></Home>
+          </ClerkLoading>
+          <SignedIn>
+            <Home></Home>
+          </SignedIn>
+          <SignedOut>
+            <SignInPage></SignInPage>
+          </SignedOut>
         </div>
       </AuthProvider>
     </ClerkProvider>

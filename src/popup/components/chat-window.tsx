@@ -26,7 +26,7 @@ export function ChatWindow({
 }) {
   const [loadingMessages, setLoadingMessages] = useState<boolean>(true);
   const { getToken, isLoaded: isAuthLoaded } = useAuth()
-  const {user} = useUser()
+  const {user, isSignedIn} = useUser()
   
 
   useEffect(()=>{
@@ -43,7 +43,7 @@ export function ChatWindow({
         console.log("Chat history fetched - ", history);
         setLoadingMessages(false)
       });
-  }, [getToken])
+  }, [getToken, isSignedIn])
 
   if (loadingMessages) {
     return (
@@ -80,7 +80,7 @@ export function ChatWindow({
       <ChatInput
         placeHolder="Got a question? Ask here..."
         isLoading={streaming}
-        isAuthLoaded={isAuthLoaded}
+        isAuthLoaded={isSignedIn && isAuthLoaded}
         onSubmit={handleSubmit}
       />
     </div>
